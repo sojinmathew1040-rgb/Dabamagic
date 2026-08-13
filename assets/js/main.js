@@ -20,19 +20,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const navOverlay = document.getElementById('dm-nav-overlay');
   const overlayNavLinks = document.querySelectorAll('.overlay-nav-link');
 
-  // 3. Specials Menu Cards Carousel Left & Right Exploration Buttons
+  // 3. Specials Menu Cards Carousel Left & Right Exploration Buttons & Auto Horizontal Scroll
   const specialsPrevBtn = document.getElementById('specials-prev-btn');
   const specialsNextBtn = document.getElementById('specials-next-btn');
   const menuCarouselWrapper = document.getElementById('menu-carousel-wrapper');
 
-  if (specialsPrevBtn && specialsNextBtn && menuCarouselWrapper) {
-    specialsPrevBtn.addEventListener('click', () => {
-      menuCarouselWrapper.scrollBy({ left: -400, behavior: 'smooth' });
+  if (menuCarouselWrapper) {
+    const scrollAmountPerStep = 380;
+    const autoScrollDelay = 3500; // 3.5s delay
+
+    const autoScrollMenu = () => {
+      const maxScrollLeft = menuCarouselWrapper.scrollWidth - menuCarouselWrapper.clientWidth;
+      if (maxScrollLeft <= 0) return;
+
+      if (menuCarouselWrapper.scrollLeft + scrollAmountPerStep >= maxScrollLeft - 20) {
+        // Smoothly loop back to start when reaching the end
+        menuCarouselWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        menuCarouselWrapper.scrollBy({ left: scrollAmountPerStep, behavior: 'smooth' });
+      }
+    };
+
+    let specialsTimer = setInterval(autoScrollMenu, autoScrollDelay);
+
+    // Pause auto-scroll on hover so user can interact
+    menuCarouselWrapper.addEventListener('mouseenter', () => clearInterval(specialsTimer));
+    menuCarouselWrapper.addEventListener('mouseleave', () => {
+      clearInterval(specialsTimer);
+      specialsTimer = setInterval(autoScrollMenu, autoScrollDelay);
     });
 
-    specialsNextBtn.addEventListener('click', () => {
-      menuCarouselWrapper.scrollBy({ left: 400, behavior: 'smooth' });
-    });
+    if (specialsPrevBtn) {
+      specialsPrevBtn.addEventListener('click', () => {
+        menuCarouselWrapper.scrollBy({ left: -scrollAmountPerStep, behavior: 'smooth' });
+      });
+    }
+
+    if (specialsNextBtn) {
+      specialsNextBtn.addEventListener('click', () => {
+        menuCarouselWrapper.scrollBy({ left: scrollAmountPerStep, behavior: 'smooth' });
+      });
+    }
   }
 
   function openNavOverlay() {
