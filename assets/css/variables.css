@@ -1,0 +1,63 @@
+/* ==========================================
+   DABA MAGIC - BRAND LOGO COLOR THEME
+   Terracotta Clay, Golden Yellow & Herbal Forest Green
+   ========================================== */
+
+:root {
+  /* Brand Terracotta & Clay Pot Palette (From Logo) */
+  --clr-terracotta: #C86338;
+  --clr-terracotta-bright: #D97346;
+  --clr-terracotta-dark: #9E421E;
+  --clr-red: #C86338;
+  --clr-red-bright: #D97346;
+  --clr-red-dark: #9E421E;
+  --clr-red-glow: rgba(200, 99, 56, 0.35);
+
+  /* Brand Golden Spice Palette (From "DABA" Logo Text) */
+  --clr-gold: #D4A017;
+  --clr-gold-bright: #E5B324;
+  --clr-gold-dark: #A87D0C;
+
+  /* Brand Herbal Green Palette (From "MAGIC" Logo Text & Leaves) */
+  --clr-green: #5C9433;
+  --clr-green-bright: #6EA940;
+  --clr-green-dark: #3F6822;
+
+  /* Dark Clay & Rich Dark Mocha Backgrounds */
+  --bg-hero: #170F0D;
+  --bg-dark-body: #110B0A;
+  --bg-dark-surface: #19100E;
+  --bg-dark-card: #201512;
+
+  /* Typography Colors */
+  --text-white: #FFFFFF;
+  --text-grey: #D5C9C4;
+  --text-muted: #9C8C85;
+  --text-terracotta: #D97346;
+
+  /* Borders & Highlights */
+  --border-dark: rgba(200, 99, 56, 0.18);
+  --border-red: #9E421E;
+  --border-gold: #D4A017;
+
+  /* Fonts */
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-cursive: 'Great Vibes', 'Cormorant Garamond', cursive;
+
+  /* Layout & Spacing */
+  --container-max: 1360px;
+  --section-padding-y: 100px;
+  --header-height: 120px;
+  --radius-sm: 6px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding-y: 65px;
+    --header-height: 95px;
+  }
+}

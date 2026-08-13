@@ -1,0 +1,258 @@
+/* ==========================================
+   DABA MAGIC - MAIN STYLES SYSTEM
+   Brand Logo Color Palette & Big Header Logo
+   ========================================== */
+
+/* Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: auto;
+  background-color: var(--bg-dark-body);
+  color: var(--text-white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  position: relative;
+  background-color: #0E0B0A;
+  color: var(--text-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Fixed Dark Texture Canvas Overlay (Matching Reference Site 100%) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0E0B0A;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(200, 99, 56, 0.22), transparent 50%),
+    radial-gradient(circle at 85% 80%, rgba(212, 160, 23, 0.16), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(92, 148, 51, 0.08), transparent 65%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.055'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Typography & Line Stabilization Rules (Prevents Text Overlaps Across Entire Site) */
+.section-title,
+.hollow-outline-text,
+.subheading-caps,
+.section-desc,
+.about-content-heading,
+.gallery-main-title {
+  display: block;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.line {
+  display: block;
+  overflow: hidden;
+}
+
+.word, .char {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.section {
+  position: relative;
+  padding-top: var(--section-padding-y);
+  padding-bottom: var(--section-padding-y);
+  z-index: 2;
+}
+
+/* Giant Hollow Outline Typography */
+.hollow-outline-text {
+  font-family: var(--font-heading);
+  font-size: clamp(2.8rem, 6.5vw, 6rem);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.cursive-subtitle {
+  font-family: var(--font-cursive);
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  color: var(--clr-gold);
+  font-weight: 300;
+  font-style: normal;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.9rem 2.2rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--clr-terracotta);
+  color: #FFFFFF;
+  border-color: var(--clr-terracotta-bright);
+}
+
+.btn-primary:hover {
+  background: var(--clr-terracotta-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(200, 99, 56, 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #FFFFFF;
+  border-color: var(--clr-gold);
+}
+
+.btn-outline:hover {
+  background: var(--clr-gold);
+  color: #110B0A;
+  transform: translateY(-2px);
+}
+
+/* Top Header Navigation */
+.site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  z-index: 990;
+  background: transparent;
+  padding-top: 0.5rem;
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+/* Big Brand Logo in Top Left Corner */
+.brand-logo-left {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.main-header-logo {
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7));
+  transition: transform 0.3s ease;
+}
+
+.brand-logo-left:hover .main-header-logo {
+  transform: scale(1.05);
+}
+
+/* Header Right Controls */
+.header-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  z-index: 1000;
+}
+
+.dm-top-links-list {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+}
+
+.dm-top-links-list a {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-white);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.dm-top-links-list a:hover {
+  color: var(--clr-gold);
+}
+
+/* Round Hamburger Button */
+.dm-menu-circle-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(23, 15, 13, 0.6);
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10001;
+  position: relative;
+}
+
+.dm-menu-circle-btn:hover {
+  background: var(--clr-terracotta);
+  border-color: var(--clr-terracotta);
+  transform: scale(1.08);
+}
+
+@media (max-width: 768px) {
+  .main-header-logo {
+    height: 80px;
+  }
+  .dm-top-links-list {
+    display: none;
+  }
+}
