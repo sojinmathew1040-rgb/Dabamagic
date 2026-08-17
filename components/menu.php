@@ -1,5 +1,32 @@
 <?php
 // components/menu.php
+if (!isset($con) || !$con || $con->connect_error) {
+    @include_once __DIR__ . '/../includes/db_connection.php';
+}
+
+// Fetch active categories dynamically
+$frontend_categories = [];
+$cat_slug_map = [];
+if (isset($con) && !$con->connect_error) {
+    $fc_query = $con->query("SELECT * FROM tbl_categories WHERE status = 'Active' ORDER BY display_order ASC, name ASC");
+    if ($fc_query && $fc_query->num_rows > 0) {
+        while ($crow = $fc_query->fetch_assoc()) {
+            $frontend_categories[] = $crow;
+            $cat_slug_map[$crow['name']] = $crow['slug'];
+        }
+    }
+}
+
+// Fetch active menu items dynamically
+$db_menu_items = [];
+if (isset($con) && !$con->connect_error) {
+    $mi_query = $con->query("SELECT * FROM tbl_menu_items WHERE status = 'Active' ORDER BY id DESC");
+    if ($mi_query && $mi_query->num_rows > 0) {
+        while ($mirow = $mi_query->fetch_assoc()) {
+            $db_menu_items[] = $mirow;
+        }
+    }
+}
 ?>
 <section id="menu" class="section section-bg-surface">
   <div class="container">
@@ -45,12 +72,20 @@
         <div class="category-tabs-scroll-track" id="category-tabs-scroll-track">
           <div class="category-tabs" style="margin-bottom: 0; display: flex; gap: 0.75rem; width: max-content;">
             <button class="cat-tab-btn active" data-category="all">All Categories</button>
-            <button class="cat-tab-btn" data-category="biryani">Biryani Specials</button>
-            <button class="cat-tab-btn" data-category="tandoori">Tandoori & Kebabs</button>
-            <button class="cat-tab-btn" data-category="curries">Royal Curries</button>
-            <button class="cat-tab-btn" data-category="south">South Indian</button>
-            <button class="cat-tab-btn" data-category="breads">Breads & Sides</button>
-            <button class="cat-tab-btn" data-category="desserts">Desserts & Beverages</button>
+            <?php if (!empty($frontend_categories)): ?>
+              <?php foreach ($frontend_categories as $fcat): ?>
+                <button class="cat-tab-btn" data-category="<?php echo htmlspecialchars($fcat['slug']); ?>">
+                  <?php echo htmlspecialchars($fcat['name']); ?>
+                </button>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <button class="cat-tab-btn" data-category="biryani">Biryani Specials</button>
+              <button class="cat-tab-btn" data-category="tandoori">Tandoori & Kebabs</button>
+              <button class="cat-tab-btn" data-category="curries">Royal Curries</button>
+              <button class="cat-tab-btn" data-category="south">South Indian</button>
+              <button class="cat-tab-btn" data-category="breads">Breads & Sides</button>
+              <button class="cat-tab-btn" data-category="desserts">Desserts & Beverages</button>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -64,149 +99,64 @@
     <!-- Menu Items Grid -->
     <div class="menu-list-grid" id="menu-items-container">
       
-      <!-- Dish 1: Chicken Dum Biryani (Non-Veg) -->
-      <div class="menu-item-row" data-category="biryani" data-diet="nonveg" data-name="Chicken Dum Biryani" data-price="€16.50" data-desc="Marinated chicken slow-cooked with basmati rice, saffron water, mint & fried onions in sealed clay pot." data-img="assets/images/hero_biryani.png" data-spice="2">
-        <div class="menu-item-thumb">
-          <img src="assets/images/hero_biryani.png" alt="Chicken Dum Biryani">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-nonveg" title="Non-Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Chicken Dum Biryani</h4>
-            </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€16.50</span>
-          </div>
-          <p class="menu-item-desc">Slow-cooked tender chicken, basmati rice, fresh mint & house biryani masala.</p>
-        </div>
-      </div>
+      <?php if (!empty($db_menu_items)): ?>
+        <?php foreach ($db_menu_items as $item): ?>
+          <?php
+            $cat_name = $item['category'];
+            $cat_slug = isset($cat_slug_map[$cat_name]) 
+              ? $cat_slug_map[$cat_name] 
+              : strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $cat_name), '-'));
 
-      <!-- Dish 2: Hyderabadi Veg Dum Biryani (Veg) -->
-      <div class="menu-item-row" data-category="biryani" data-diet="veg" data-name="Hyderabadi Veg Dum Biryani" data-price="€14.50" data-desc="Fragrant rice layered with fresh garden vegetables, cottage cheese, saffron & rose water." data-img="assets/images/hero_biryani.png" data-spice="1">
-        <div class="menu-item-thumb">
-          <img src="assets/images/hero_biryani.png" alt="Veg Biryani">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-veg" title="Pure Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Hyderabadi Veg Dum Biryani</h4>
+            // Basic diet detection helper
+            $desc_lower = strtolower($item['name'] . ' ' . $item['description']);
+            $is_veg = (strpos($desc_lower, 'paneer') !== false || strpos($desc_lower, 'veg') !== false || strpos($desc_lower, 'dosa') !== false || strpos($desc_lower, 'palak') !== false || strpos($desc_lower, 'dal') !== false || strpos($desc_lower, 'lassi') !== false || strpos($desc_lower, 'jamun') !== false);
+            $diet_type = $is_veg ? 'veg' : 'nonveg';
+            $diet_title = $is_veg ? 'Pure Vegetarian' : 'Non-Vegetarian';
+            $diet_class = $is_veg ? 'diet-veg' : 'diet-nonveg';
+            $image_path = "assets/images/" . (!empty($item['image']) ? htmlspecialchars($item['image']) : "default_dish.png");
+          ?>
+          <div class="menu-item-row trigger-dish-modal" 
+               data-category="<?php echo htmlspecialchars($cat_slug); ?>" 
+               data-diet="<?php echo $diet_type; ?>" 
+               data-name="<?php echo htmlspecialchars($item['name']); ?>" 
+               data-price="€<?php echo number_format($item['price'], 2); ?>" 
+               data-desc="<?php echo htmlspecialchars($item['description']); ?>" 
+               data-img="<?php echo $image_path; ?>" 
+               data-spice="2" 
+               style="cursor: pointer;">
+            <div class="menu-item-thumb">
+              <img src="<?php echo $image_path; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='https://via.placeholder.com/80x80?text=Food'">
             </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€14.50</span>
-          </div>
-          <p class="menu-item-desc">Assorted fresh vegetables, paneer cubes, saffron basmati rice & fried onions.</p>
-        </div>
-      </div>
-
-      <!-- Dish 3: Charcoal Chicken Tikka (Non-Veg) -->
-      <div class="menu-item-row" data-category="tandoori" data-diet="nonveg" data-name="Charcoal Chicken Tikka" data-price="€15.00" data-desc="Boneless chicken chunks marinated in hung yogurt, red chili, kashmiri spices & roasted in tandoor." data-img="assets/images/tandoori_kebab.png" data-spice="2">
-        <div class="menu-item-thumb">
-          <img src="assets/images/tandoori_kebab.png" alt="Chicken Tikka">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-nonveg" title="Non-Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Charcoal Chicken Tikka</h4>
+            <div class="menu-item-details">
+              <div class="menu-item-header">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <span class="diet-badge <?php echo $diet_class; ?>" title="<?php echo $diet_title; ?>"><span class="dot"></span></span>
+                  <h4 class="menu-item-name"><?php echo htmlspecialchars($item['name']); ?></h4>
+                </div>
+                <div class="menu-item-dots"></div>
+                <span class="menu-item-price">€<?php echo number_format($item['price'], 2); ?></span>
+              </div>
+              <p class="menu-item-desc"><?php echo htmlspecialchars($item['description']); ?></p>
             </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€15.00</span>
           </div>
-          <p class="menu-item-desc">Yogurt & spice marinated chicken skewers roasted over hot charcoal coals.</p>
-        </div>
-      </div>
-
-      <!-- Dish 4: Tandoori Paneer Tikka (Veg) -->
-      <div class="menu-item-row" data-category="tandoori" data-diet="veg" data-name="Tandoori Paneer Tikka" data-price="€13.80" data-desc="Fresh cottage cheese, bell peppers & onions marinated in spiced mustard oil marinade." data-img="assets/images/tandoori_kebab.png" data-spice="1">
-        <div class="menu-item-thumb">
-          <img src="assets/images/tandoori_kebab.png" alt="Paneer Tikka">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-veg" title="Pure Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Tandoori Paneer Tikka</h4>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <!-- Static Fallback Items if DB is disconnected -->
+        <div class="menu-item-row trigger-dish-modal" data-category="biryani" data-diet="nonveg" data-name="Chicken Dum Biryani" data-price="€16.50" data-desc="Marinated chicken slow-cooked with basmati rice, saffron water, mint & fried onions in sealed clay pot." data-img="assets/images/hero_biryani.png" data-spice="2">
+          <div class="menu-item-thumb"><img src="assets/images/hero_biryani.png" alt="Chicken Dum Biryani"></div>
+          <div class="menu-item-details">
+            <div class="menu-item-header">
+              <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span class="diet-badge diet-nonveg" title="Non-Vegetarian"><span class="dot"></span></span>
+                <h4 class="menu-item-name">Chicken Dum Biryani</h4>
+              </div>
+              <div class="menu-item-dots"></div>
+              <span class="menu-item-price">€16.50</span>
             </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€13.80</span>
+            <p class="menu-item-desc">Slow-cooked tender chicken, basmati rice, fresh mint & house biryani masala.</p>
           </div>
-          <p class="menu-item-desc">Grilled cottage cheese cubes, colorful peppers, lemon mint glaze & ajwain masala.</p>
         </div>
-      </div>
-
-      <!-- Dish 5: Classic Butter Chicken (Non-Veg) -->
-      <div class="menu-item-row" data-category="curries" data-diet="nonveg" data-name="Classic Butter Chicken" data-price="€16.90" data-desc="Rich creamy tomato butter gravy with succulent roasted tandoori chicken pieces." data-img="assets/images/butter_chicken.png" data-spice="1">
-        <div class="menu-item-thumb">
-          <img src="assets/images/butter_chicken.png" alt="Butter Chicken">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-nonveg" title="Non-Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Classic Butter Chicken</h4>
-            </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€16.90</span>
-          </div>
-          <p class="menu-item-desc">Velvety tomato gravy, farm fresh butter, organic cream & roasted fenugreek leaves.</p>
-        </div>
-      </div>
-
-      <!-- Dish 6: Palak Paneer Special (Veg) -->
-      <div class="menu-item-row" data-category="curries" data-diet="veg" data-name="Palak Paneer Special" data-price="€14.20" data-desc="Fresh spinach puree tempered with garlic, cumin, and soft paneer cubes." data-img="assets/images/butter_chicken.png" data-spice="1">
-        <div class="menu-item-thumb">
-          <img src="assets/images/butter_chicken.png" alt="Palak Paneer">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-veg" title="Pure Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Palak Paneer Special</h4>
-            </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€14.20</span>
-          </div>
-          <p class="menu-item-desc">Organic spinach puree tempered with golden garlic, cumin, cream & paneer.</p>
-        </div>
-      </div>
-
-      <!-- Dish 7: Royal Lamb Dum Biryani (Non-Veg) -->
-      <div class="menu-item-row" data-category="biryani" data-diet="nonveg" data-name="Royal Lamb Dum Biryani" data-price="€18.50" data-desc="Tender lamb shank cooked with aromatic spices and saffron basmati rice." data-img="assets/images/hero_biryani.png" data-spice="3">
-        <div class="menu-item-thumb">
-          <img src="assets/images/hero_biryani.png" alt="Lamb Biryani">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-nonveg" title="Non-Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Royal Lamb Dum Biryani</h4>
-            </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€18.50</span>
-          </div>
-          <p class="menu-item-desc">Slow-cooked succulent lamb, saffron rice, caramelized onions & cardamom aroma.</p>
-        </div>
-      </div>
-
-      <!-- Dish 8: Crispy Masala Dosa (Veg) -->
-      <div class="menu-item-row" data-category="south" data-diet="veg" data-name="Crispy Masala Dosa" data-price="€13.50" data-desc="Golden crisp crepe with potato masala stuffing, served with coconut chutney & sambar." data-img="assets/images/crisp_dosa.png" data-spice="1">
-        <div class="menu-item-thumb">
-          <img src="assets/images/crisp_dosa.png" alt="Masala Dosa">
-        </div>
-        <div class="menu-item-details">
-          <div class="menu-item-header">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span class="diet-badge diet-veg" title="Pure Vegetarian"><span class="dot"></span></span>
-              <h4 class="menu-item-name">Crispy Masala Dosa</h4>
-            </div>
-            <div class="menu-item-dots"></div>
-            <span class="menu-item-price">€13.50</span>
-          </div>
-          <p class="menu-item-desc">Fermented rice & lentil crepe filled with mustard potato masala & chutneys.</p>
-        </div>
-      </div>
+      <?php endif; ?>
 
     </div>
 

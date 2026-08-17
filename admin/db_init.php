@@ -113,6 +113,39 @@ function init_admin_database($con) {
         }
         $stmt_m->close();
     }
+
+    // 4. Create tbl_categories
+    $sql_cat = "CREATE TABLE IF NOT EXISTS tbl_categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE,
+        slug VARCHAR(100) NOT NULL UNIQUE,
+        description TEXT NULL,
+        status VARCHAR(20) DEFAULT 'Active',
+        display_order INT DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    $con->query($sql_cat);
+
+    // Seed categories if empty
+    $check_cat = $con->query("SELECT id FROM tbl_categories LIMIT 1");
+    if ($check_cat && $check_cat->num_rows === 0) {
+        $seed_categories = [
+            ['Biryani & Rice', 'biryani', 'Aromatic dum biryanis and authentic fragrant rice specialties.', 'Active', 1],
+            ['Tandoor Specials', 'tandoori', 'Juicy kebabs, tikka platters, and clay-oven grilled delicacies.', 'Active', 2],
+            ['Curries', 'curries', 'Rich, velvety gravies simmered with aromatic whole spices.', 'Active', 3],
+            ['South Indian', 'south', 'Crispy dosas, fluffy idlis, and coastal South Indian flavors.', 'Active', 4],
+            ['Vegetarian', 'vegetarian', 'Wholesome pure-vegetarian specialties and cottage cheese dishes.', 'Active', 5],
+            ['Beverages', 'beverages', 'Refreshing churned lassis, spiced chai, and cold drinks.', 'Active', 6],
+            ['Desserts', 'desserts', 'Traditional warm milk dumplings and decadent sweet treats.', 'Active', 7]
+        ];
+
+        $stmt_c = $con->prepare("INSERT INTO tbl_categories (name, slug, description, status, display_order) VALUES (?, ?, ?, ?, ?)");
+        foreach ($seed_categories as $c) {
+            $stmt_c->bind_param("ssssi", $c[0], $c[1], $c[2], $c[3], $c[4]);
+            $stmt_c->execute();
+        }
+        $stmt_c->close();
+    }
 }
 
 // Auto-run schema check

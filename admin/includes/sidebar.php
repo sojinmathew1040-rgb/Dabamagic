@@ -47,6 +47,13 @@ if (isset($con) && !$con->connect_error) {
     </div>
 
     <div class="nav-item">
+      <a href="categories.php" class="nav-link <?php echo ($current_page == 'categories.php') ? 'active' : ''; ?>">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Categories</span>
+      </a>
+    </div>
+
+    <div class="nav-item">
       <a href="menu.php" class="nav-link <?php echo ($current_page == 'menu.php') ? 'active' : ''; ?>">
         <i class="fa-solid fa-utensils"></i>
         <span>Menu Items</span>

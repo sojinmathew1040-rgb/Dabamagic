@@ -82,8 +82,16 @@ if ($menu_query) {
     }
 }
 
-// Distinct Categories for Filter Dropdown
-$categories = ['Biryani & Rice', 'Tandoor Specials', 'Curries', 'South Indian', 'Vegetarian', 'Beverages', 'Desserts'];
+// Dynamic Categories from Database
+$categories = [];
+$cat_query = $con->query("SELECT name FROM tbl_categories WHERE status = 'Active' ORDER BY display_order ASC, name ASC");
+if ($cat_query && $cat_query->num_rows > 0) {
+    while ($crow = $cat_query->fetch_assoc()) {
+        $categories[] = $crow['name'];
+    }
+} else {
+    $categories = ['Biryani & Rice', 'Tandoor Specials', 'Curries', 'South Indian', 'Vegetarian', 'Beverages', 'Desserts'];
+}
 
 include_once __DIR__ . '/includes/header.php';
 ?>
