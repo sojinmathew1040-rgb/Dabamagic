@@ -340,6 +340,27 @@ a {
   color: var(--clr-terracotta-bright);
 }
 
+.sidebar-collapse-btn {
+  margin-left: auto;
+  background: var(--bg-admin-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--clr-gold-bright);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--clr-terracotta);
+  color: #FFF;
+  border-color: var(--clr-terracotta-bright);
+}
+
 .sidebar-menu {
   padding: 1.5rem 1rem;
   flex: 1;
@@ -461,6 +482,94 @@ a {
 }
 .logout-btn:hover {
   color: var(--clr-red-bright);
+}
+
+/* ==========================================================================
+   COLLAPSED SIDEBAR (ICON-ONLY MODE)
+   ========================================================================== */
+.admin-wrapper.collapsed-sidebar {
+  --sidebar-width: 80px;
+}
+
+.admin-wrapper.collapsed-sidebar .sidebar-brand {
+  padding: 0;
+  justify-content: center;
+}
+
+.admin-wrapper.collapsed-sidebar .sidebar-brand-text {
+  display: none;
+}
+
+.admin-wrapper.collapsed-sidebar .sidebar-collapse-btn {
+  margin-left: 0;
+}
+
+.admin-wrapper.collapsed-sidebar .menu-section-label {
+  font-size: 0;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 1rem 0.75rem;
+  padding: 0;
+}
+
+.admin-wrapper.collapsed-sidebar .nav-link {
+  justify-content: center;
+  padding: 0.85rem 0;
+}
+
+.admin-wrapper.collapsed-sidebar .nav-link span {
+  display: none;
+}
+
+.admin-wrapper.collapsed-sidebar .nav-link .nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 14px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.65rem;
+}
+
+.admin-wrapper.collapsed-sidebar .sidebar-user {
+  padding: 1rem 0;
+  justify-content: center;
+}
+
+.admin-wrapper.collapsed-sidebar .user-info,
+.admin-wrapper.collapsed-sidebar .logout-btn {
+  display: none;
+}
+
+/* Hover Tooltips for Icon-Only Mode */
+.admin-wrapper.collapsed-sidebar [data-tooltip] {
+  position: relative;
+}
+
+.admin-wrapper.collapsed-sidebar [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  background: var(--bg-admin-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-gold);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 999;
+}
+
+.admin-wrapper.collapsed-sidebar [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(15px);
 }
 
 /* Main Content Area */

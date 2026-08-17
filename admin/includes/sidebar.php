@@ -22,6 +22,9 @@ if (isset($con) && !$con->connect_error) {
     <div class="sidebar-brand-text">
       DABA <span>MAGIC</span>
     </div>
+    <button type="button" class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Toggle Menu Collapse / Expand">
+      <i class="fa-solid fa-angles-left" id="collapse-icon"></i>
+    </button>
   </div>
 
   <!-- Navigation Menu -->
@@ -30,14 +33,14 @@ if (isset($con) && !$con->connect_error) {
     <div class="menu-section-label">Main Menu</div>
 
     <div class="nav-item">
-      <a href="index.php" class="nav-link <?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
+      <a href="index.php" class="nav-link <?php echo ($current_page == 'index.php') ? 'active' : ''; ?>" data-tooltip="Dashboard">
         <i class="fa-solid fa-chart-pie"></i>
         <span>Dashboard</span>
       </a>
     </div>
 
     <div class="nav-item">
-      <a href="reservations.php" class="nav-link <?php echo ($current_page == 'reservations.php') ? 'active' : ''; ?>">
+      <a href="reservations.php" class="nav-link <?php echo ($current_page == 'reservations.php') ? 'active' : ''; ?>" data-tooltip="Reservations <?php echo ($pending_count > 0 ? "($pending_count)" : ''); ?>">
         <i class="fa-solid fa-calendar-check"></i>
         <span>Reservations</span>
         <?php if ($pending_count > 0): ?>
@@ -47,14 +50,14 @@ if (isset($con) && !$con->connect_error) {
     </div>
 
     <div class="nav-item">
-      <a href="categories.php" class="nav-link <?php echo ($current_page == 'categories.php') ? 'active' : ''; ?>">
+      <a href="categories.php" class="nav-link <?php echo ($current_page == 'categories.php') ? 'active' : ''; ?>" data-tooltip="Categories">
         <i class="fa-solid fa-layer-group"></i>
         <span>Categories</span>
       </a>
     </div>
 
     <div class="nav-item">
-      <a href="menu.php" class="nav-link <?php echo ($current_page == 'menu.php') ? 'active' : ''; ?>">
+      <a href="menu.php" class="nav-link <?php echo ($current_page == 'menu.php') ? 'active' : ''; ?>" data-tooltip="Menu Items">
         <i class="fa-solid fa-utensils"></i>
         <span>Menu Items</span>
       </a>
@@ -63,14 +66,14 @@ if (isset($con) && !$con->connect_error) {
     <div class="menu-section-label">Shortcuts & Site</div>
 
     <div class="nav-item">
-      <a href="../index.php" target="_blank" class="nav-link">
+      <a href="../index.php" target="_blank" class="nav-link" data-tooltip="View Website">
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
         <span>View Website</span>
       </a>
     </div>
 
     <div class="nav-item">
-      <a href="logout.php" class="nav-link" style="color: var(--clr-red-bright);">
+      <a href="logout.php" class="nav-link logout-nav" style="color: var(--clr-red-bright);" data-tooltip="Logout Session">
         <i class="fa-solid fa-right-from-bracket" style="color: var(--clr-red-bright);"></i>
         <span>Logout Session</span>
       </a>
@@ -79,7 +82,7 @@ if (isset($con) && !$con->connect_error) {
   </div>
 
   <!-- User Card Footer -->
-  <div class="sidebar-user">
+  <div class="sidebar-user" data-tooltip="<?php echo htmlspecialchars($admin_user); ?> (<?php echo htmlspecialchars($admin_role); ?>)">
     <div class="user-avatar">
       <?php echo strtoupper(substr($admin_user, 0, 1)); ?>
     </div>

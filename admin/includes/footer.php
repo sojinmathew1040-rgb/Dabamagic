@@ -39,12 +39,54 @@
   setInterval(updateLiveClock, 1000);
   updateLiveClock();
 
-  // Mobile Sidebar Toggle
+  // Sidebar Expand / Collapse Toggle & LocalStorage State Persistence
+  const adminWrapper = document.querySelector('.admin-wrapper');
+  const collapseBtn = document.getElementById('sidebar-collapse-btn');
+  const collapseIcon = document.getElementById('collapse-icon');
   const sidebarToggleBtn = document.getElementById('sidebar-toggle');
   const adminSidebar = document.getElementById('admin-sidebar');
-  if (sidebarToggleBtn && adminSidebar) {
+
+  function setSidebarCollapsed(collapsed) {
+    if (!adminWrapper) return;
+    if (collapsed) {
+      adminWrapper.classList.add('collapsed-sidebar');
+      if (collapseIcon) {
+        collapseIcon.classList.remove('fa-angles-left');
+        collapseIcon.classList.add('fa-angles-right');
+      }
+      localStorage.setItem('admin_sidebar_collapsed', 'true');
+    } else {
+      adminWrapper.classList.remove('collapsed-sidebar');
+      if (collapseIcon) {
+        collapseIcon.classList.remove('fa-angles-right');
+        collapseIcon.classList.add('fa-angles-left');
+      }
+      localStorage.setItem('admin_sidebar_collapsed', 'false');
+    }
+  }
+
+  // Restore sidebar state from localStorage on load
+  if (localStorage.getItem('admin_sidebar_collapsed') === 'true') {
+    setSidebarCollapsed(true);
+  }
+
+  // Dedicated collapse button click
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      const isCollapsed = adminWrapper.classList.contains('collapsed-sidebar');
+      setSidebarCollapsed(!isCollapsed);
+    });
+  }
+
+  // Header toggle button click (mobile open vs desktop collapse)
+  if (sidebarToggleBtn) {
     sidebarToggleBtn.addEventListener('click', () => {
-      adminSidebar.classList.toggle('mobile-open');
+      if (window.innerWidth <= 768) {
+        if (adminSidebar) adminSidebar.classList.toggle('mobile-open');
+      } else {
+        const isCollapsed = adminWrapper.classList.contains('collapsed-sidebar');
+        setSidebarCollapsed(!isCollapsed);
+      }
     });
   }
 
