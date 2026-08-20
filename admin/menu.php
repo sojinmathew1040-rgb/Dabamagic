@@ -51,6 +51,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle AJAX Delete Unused Image
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_image') {
+    header('Content-Type: application/json');
+    $filename = basename(trim($_POST['filename'] ?? ''));
+
+    if (empty($filename)) {
+        echo json_encode(['success' => false, 'error' => 'No filename provided.']);
+        exit;
+    }
+
+    $protected_images = ['logo.png', 'default_dish.png', 'ambiance.png'];
+    if (in_array($filename, $protected_images)) {
+        echo json_encode(['success' => false, 'error' => 'This is a protected system asset and cannot be deleted.']);
+        exit;
+    }
+
+    // Check if image is currently used by any dish
+    $stmt = $con->prepare("SELECT COUNT(*) AS cnt FROM tbl_menu_items WHERE image = ?");
+    $stmt->bind_param("s", $filename);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $cnt = $res ? $res->fetch_assoc()['cnt'] : 0;
+    $stmt->close();
+
+    if ($cnt > 0) {
+        echo json_encode(['success' => false, 'error' => "Cannot delete: This image is currently assigned to {$cnt} dish(es)."]);
+        exit;
+    }
+
+    $file_path = __DIR__ . '/../assets/images/' . $filename;
+    if (file_exists($file_path) && is_file($file_path)) {
+        if (@unlink($file_path)) {
+            echo json_encode(['success' => true, 'filename' => $filename]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to delete file from disk.']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'error' => 'File does not exist on server.']);
+    }
+    exit;
+}
+
 $page_title = "Menu Catalog Management - Daba Magic Admin Panel";
 
 $msg = "";
@@ -169,6 +211,16 @@ if ($cat_query && $cat_query->num_rows > 0) {
     $categories = ['Biryani & Rice', 'Tandoor Specials', 'Curries', 'South Indian', 'Vegetarian', 'Beverages', 'Desserts'];
 }
 
+// Query list of images in use by dishes
+$used_images = [];
+$used_res = $con->query("SELECT DISTINCT image FROM tbl_menu_items WHERE image IS NOT NULL AND image != ''");
+if ($used_res) {
+    while ($urow = $used_res->fetch_assoc()) {
+        $used_images[] = $urow['image'];
+    }
+}
+$protected_images = ['logo.png', 'default_dish.png', 'ambiance.png'];
+
 // Scan Existing Dish Images on Server
 $existing_images = [];
 $images_dir = __DIR__ . '/../assets/images';
@@ -176,10 +228,17 @@ if (is_dir($images_dir)) {
     $files = scandir($images_dir);
     foreach ($files as $file) {
         if ($file !== '.' && $file !== '..' && preg_match('/\.(jpg|jpeg|png|webp|gif|svg)$/i', $file)) {
+            $is_used = in_array($file, $used_images);
+            $is_protected = in_array($file, $protected_images);
+            $can_delete = !$is_used && !$is_protected;
+
             $existing_images[] = [
                 'filename' => $file,
                 'url' => '../assets/images/' . $file,
-                'size' => round(filesize($images_dir . '/' . $file) / 1024, 1) . ' KB'
+                'size' => round(filesize($images_dir . '/' . $file) / 1024, 1) . ' KB',
+                'is_used' => $is_used,
+                'is_protected' => $is_protected,
+                'can_delete' => $can_delete
             ];
         }
     }
@@ -556,22 +615,41 @@ include_once __DIR__ . '/includes/header.php';
           </div>
         <?php else: ?>
           <?php foreach ($existing_images as $img): ?>
-            <div class="media-thumb-item" data-filename="<?php echo htmlspecialchars($img['filename']); ?>" onclick="selectExistingImage('<?php echo htmlspecialchars($img['filename']); ?>')">
-              <div class="media-thumb-img-wrap">
+            <?php $item_uid = 'thumb-item-' . md5($img['filename']); ?>
+            <div class="media-thumb-item" id="<?php echo $item_uid; ?>" data-filename="<?php echo htmlspecialchars($img['filename']); ?>">
+              <div class="media-thumb-img-wrap" onclick="selectExistingImage('<?php echo htmlspecialchars($img['filename']); ?>')">
                 <img src="<?php echo htmlspecialchars($img['url']); ?>" alt="<?php echo htmlspecialchars($img['filename']); ?>" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'52\' height=\'52\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23221613\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23D4A017\' font-size=\'18\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E🍲%3C/text%3E%3C/svg%3E';">
               </div>
-              <div class="media-thumb-info">
+              <div class="media-thumb-info" onclick="selectExistingImage('<?php echo htmlspecialchars($img['filename']); ?>')">
                 <strong class="media-thumb-name" title="<?php echo htmlspecialchars($img['filename']); ?>">
                   <?php echo htmlspecialchars($img['filename']); ?>
                 </strong>
                 <span class="media-thumb-meta">
-                  <i class="fa-regular fa-image" style="color: var(--clr-gold);"></i> <?php echo strtoupper(pathinfo($img['filename'], PATHINFO_EXTENSION)); ?> • <?php echo $img['size']; ?>
+                  <span><i class="fa-regular fa-image" style="color: var(--clr-gold);"></i> <?php echo strtoupper(pathinfo($img['filename'], PATHINFO_EXTENSION)); ?> • <?php echo $img['size']; ?></span>
+                  <?php if ($img['is_used']): ?>
+                    <span class="badge-img-status used" title="Currently used by dish(es)"><i class="fa-solid fa-link"></i> In Use</span>
+                  <?php elseif ($img['is_protected']): ?>
+                    <span class="badge-img-status system" title="Protected system asset"><i class="fa-solid fa-shield"></i> System</span>
+                  <?php else: ?>
+                    <span class="badge-img-status unused" title="Unused image (can be removed)"><i class="fa-solid fa-circle-check"></i> Unused</span>
+                  <?php endif; ?>
                 </span>
               </div>
-              <button type="button" class="btn-select-thumb" title="Use this image">
-                <i class="fa-solid fa-check"></i>
-                <span>Select</span>
-              </button>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <button type="button" class="btn-select-thumb" onclick="selectExistingImage('<?php echo htmlspecialchars($img['filename']); ?>')" title="Use this image">
+                  <i class="fa-solid fa-check"></i>
+                  <span>Select</span>
+                </button>
+                <button type="button" class="btn-thumb-crop" onclick="cropExistingImage('<?php echo htmlspecialchars($img['filename']); ?>', '<?php echo htmlspecialchars($img['url']); ?>', event)" title="Crop or adjust this image">
+                  <i class="fa-solid fa-crop-simple"></i>
+                  <span>Crop</span>
+                </button>
+                <?php if ($img['can_delete']): ?>
+                  <button type="button" class="btn-thumb-delete" onclick="deleteExistingImage('<?php echo htmlspecialchars($img['filename']); ?>', '<?php echo $item_uid; ?>', event)" title="Remove unused image file">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                <?php endif; ?>
+              </div>
             </div>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -862,16 +940,29 @@ include_once __DIR__ . '/includes/header.php';
             <div class="media-thumb-img-wrap">
               <img src="${result.url}" alt="${result.filename}">
             </div>
-            <div class="media-thumb-info">
+            <div class="media-thumb-info" onclick="selectExistingImage('${result.filename}')">
               <strong class="media-thumb-name" title="${result.filename}">${result.filename}</strong>
-              <span class="media-thumb-meta"><i class="fa-regular fa-image" style="color: var(--clr-gold);"></i> NEW UPLOAD</span>
+              <span class="media-thumb-meta">
+                <span><i class="fa-regular fa-image" style="color: var(--clr-gold);"></i> PNG</span>
+                <span class="badge-img-status unused"><i class="fa-solid fa-circle-check"></i> New</span>
+              </span>
             </div>
-            <button type="button" class="btn-select-thumb">
-              <i class="fa-solid fa-check"></i>
-              <span>Select</span>
-            </button>
+            <div style="display: flex; align-items: center; gap: 0.45rem;">
+              <button type="button" class="btn-select-thumb" onclick="selectExistingImage('${result.filename}')" title="Use this image">
+                <i class="fa-solid fa-check"></i>
+                <span>Select</span>
+              </button>
+              <button type="button" class="btn-thumb-crop" onclick="cropExistingImage('${result.filename}', '${result.url}', event)" title="Crop or adjust this image">
+                <i class="fa-solid fa-crop-simple"></i>
+                <span>Crop</span>
+              </button>
+              <button type="button" class="btn-thumb-delete" onclick="deleteExistingImage('${result.filename}', '${newItem.id}', event)" title="Remove unused image file">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
           `;
           galleryContainer.prepend(newItem);
+          updateGalleryCount();
         }
       } else {
         alert('Error saving image: ' + (result.error || 'Unknown error occurred.'));
@@ -883,6 +974,95 @@ include_once __DIR__ . '/includes/header.php';
       console.error('Cropper upload error:', error);
       alert('Upload failed. Please check server permissions or try another image.');
     });
+  }
+
+  // Crop / Recrop an Existing Image
+  function cropExistingImage(filename, imageUrl, event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    selectedFileObject = { name: filename };
+    const targetImg = document.getElementById('cropper-target-img');
+    targetImg.src = imageUrl;
+
+    document.getElementById('cropper-upload-zone').style.display = 'none';
+    document.getElementById('cropper-workspace').style.display = 'block';
+
+    switchMediaTab('crop');
+
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+
+    const initCropperTool = () => {
+      cropperInstance = new Cropper(targetImg, {
+        aspectRatio: 1 / 1,
+        viewMode: 2,
+        autoCropArea: 0.9,
+        responsive: true,
+        guides: true,
+        center: true,
+        highlight: true,
+        background: true
+      });
+    };
+
+    if (targetImg.complete) {
+      initCropperTool();
+    } else {
+      targetImg.onload = initCropperTool;
+    }
+  }
+
+  // Delete Unused Existing Image
+  function deleteExistingImage(filename, elementId, event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (!confirm(`Are you sure you want to permanently delete '${filename}' from the server?`)) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'delete_image');
+    formData.append('filename', filename);
+
+    fetch('menu.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const itemEl = document.getElementById(elementId);
+        if (itemEl) {
+          itemEl.style.transition = 'all 0.3s ease';
+          itemEl.style.opacity = '0';
+          itemEl.style.transform = 'translateX(-20px)';
+          setTimeout(() => {
+            itemEl.remove();
+            updateGalleryCount();
+          }, 300);
+        }
+      } else {
+        alert(data.error || 'Failed to delete image.');
+      }
+    })
+    .catch(err => {
+      console.error('Delete error:', err);
+      alert('Server error while deleting image.');
+    });
+  }
+
+  function updateGalleryCount() {
+    const count = document.querySelectorAll('.media-thumb-item').length;
+    const countSpan = document.querySelector('#tab-btn-gallery span');
+    if (countSpan) {
+      countSpan.textContent = `Existing Images (${count})`;
+    }
   }
 </script>
 
