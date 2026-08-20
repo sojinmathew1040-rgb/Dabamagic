@@ -340,9 +340,15 @@ include_once __DIR__ . '/includes/header.php';
                 </span>
               </td>
               <td>
-                <strong style="color: var(--text-primary); font-size: 0.95rem; font-family: var(--font-heading);">
-                  <?php echo htmlspecialchars($cat['name']); ?>
-                </strong>
+                <a href="javascript:void(0)" 
+                   onclick="openEditModal(<?php echo htmlspecialchars(json_encode($cat)); ?>)"
+                   style="color: var(--text-primary); text-decoration: none; font-size: 0.95rem; font-family: var(--font-heading); font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; transition: var(--transition-fast);"
+                   onmouseover="this.style.color='var(--clr-gold)'" 
+                   onmouseout="this.style.color='var(--text-primary)'" 
+                   title="Click to edit category details">
+                  <span><?php echo htmlspecialchars($cat['name']); ?></span>
+                  <i class="fa-solid fa-pen-to-square" style="font-size: 0.75rem; color: var(--clr-gold); opacity: 0.7;"></i>
+                </a>
               </td>
               <td>
                 <code style="background: rgba(200, 99, 56, 0.12); color: var(--clr-terracotta-bright); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.825rem;">
@@ -370,7 +376,7 @@ include_once __DIR__ . '/includes/header.php';
                 <div class="table-actions">
                   
                   <!-- Edit Button Trigger -->
-                  <button type="button" class="btn-action-icon" title="Edit Category"
+                  <button type="button" class="btn-action-icon success" title="Edit Category Details"
                           onclick="openEditModal(<?php echo htmlspecialchars(json_encode($cat)); ?>)">
                     <i class="fa-solid fa-pen-to-square"></i>
                   </button>
@@ -477,12 +483,13 @@ include_once __DIR__ . '/includes/header.php';
       
       <div class="form-group">
         <label class="form-label">Category Name</label>
-        <input type="text" name="name" id="edit-cat-name" class="form-control" required placeholder="e.g. Starters & Appetizers">
+        <input type="text" name="name" id="edit-cat-name" class="form-control" required placeholder="e.g. Starters & Appetizers" onkeyup="autoGenerateSlug('edit-cat-name', 'edit-cat-slug')">
       </div>
 
       <div class="form-group">
         <label class="form-label">Slug / Identifier</label>
         <input type="text" name="slug" id="edit-cat-slug" class="form-control" required placeholder="e.g. starters">
+        <small style="color: var(--text-muted); font-size: 0.775rem;">Used for frontend tabs and URL parameters. Auto-updates when title changes.</small>
       </div>
 
       <div class="form-group">
@@ -541,6 +548,19 @@ include_once __DIR__ . '/includes/header.php';
     document.getElementById('edit-cat-status').value = category.status;
     openModal('edit-category-modal');
   }
+
+  <?php
+    // Auto-open edit modal if edit_id parameter is passed in URL
+    if (isset($_GET['edit_id'])) {
+        $edit_id = intval($_GET['edit_id']);
+        foreach ($categories_list as $c_item) {
+            if ($c_item['id'] == $edit_id) {
+                echo "document.addEventListener('DOMContentLoaded', function() { openEditModal(" . json_encode($c_item) . "); });";
+                break;
+            }
+        }
+    }
+  ?>
 </script>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>

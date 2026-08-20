@@ -18,7 +18,7 @@ if (isset($con) && !$con->connect_error) {
   
   <!-- Brand Logo Bar -->
   <div class="sidebar-brand">
-    <img src="../assets/images/logo.png" alt="Daba Magic Logo" onerror="this.src='https://via.placeholder.com/40x40?text=DM'">
+    <img src="../assets/images/logo.png" alt="Daba Magic Logo" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' rx=\'8\' fill=\'%23C86338\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23FFFFFF\' font-size=\'14\' font-weight=\'bold\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3EDM%3C/text%3E%3C/svg%3E';">
     <div class="sidebar-brand-text">
       DABA <span>MAGIC</span>
     </div>

@@ -125,7 +125,7 @@ if (isset($con) && !$con->connect_error) {
                data-spice="2" 
                style="cursor: pointer;">
             <div class="menu-item-thumb">
-              <img src="<?php echo $image_path; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='https://via.placeholder.com/80x80?text=Food'">
+              <img src="<?php echo $image_path; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'%3E%3Crect width=\'80\' height=\'80\' fill=\'%23221613\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23D4A017\' font-size=\'32\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E🍲%3C/text%3E%3C/svg%3E';">
             </div>
             <div class="menu-item-details">
               <div class="menu-item-header">
