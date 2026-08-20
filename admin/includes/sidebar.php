@@ -4,13 +4,20 @@
  */
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Count pending reservations for navigation badge
+// Count pending reservations and active orders for navigation badges
 $pending_count = 0;
+$active_orders_count = 0;
 if (isset($con) && !$con->connect_error) {
     $res = $con->query("SELECT COUNT(*) AS cnt FROM tbl_reservations WHERE status = 'Pending'");
     if ($res) {
         $row = $res->fetch_assoc();
         $pending_count = $row['cnt'];
+    }
+
+    $ord_res = $con->query("SELECT COUNT(*) AS cnt FROM tbl_orders WHERE order_status IN ('Received', 'Preparing', 'OutForDelivery')");
+    if ($ord_res) {
+        $o_row = $ord_res->fetch_assoc();
+        $active_orders_count = $o_row['cnt'];
     }
 }
 ?>
@@ -40,6 +47,16 @@ if (isset($con) && !$con->connect_error) {
     </div>
 
     <div class="nav-item">
+      <a href="orders.php" class="nav-link <?php echo ($current_page == 'orders.php') ? 'active' : ''; ?>" data-tooltip="Customer Orders <?php echo ($active_orders_count > 0 ? "($active_orders_count)" : ''); ?>">
+        <i class="fa-solid fa-receipt"></i>
+        <span>Customer Orders</span>
+        <?php if ($active_orders_count > 0): ?>
+          <span class="nav-badge" style="background: var(--clr-terracotta);"><?php echo $active_orders_count; ?></span>
+        <?php endif; ?>
+      </a>
+    </div>
+
+    <div class="nav-item">
       <a href="reservations.php" class="nav-link <?php echo ($current_page == 'reservations.php') ? 'active' : ''; ?>" data-tooltip="Reservations <?php echo ($pending_count > 0 ? "($pending_count)" : ''); ?>">
         <i class="fa-solid fa-calendar-check"></i>
         <span>Reservations</span>
@@ -63,7 +80,21 @@ if (isset($con) && !$con->connect_error) {
       </a>
     </div>
 
-    <div class="menu-section-label">Shortcuts & Site</div>
+    <div class="nav-item">
+      <a href="users.php" class="nav-link <?php echo ($current_page == 'users.php') ? 'active' : ''; ?>" data-tooltip="Operators & Roles">
+        <i class="fa-solid fa-users-gear"></i>
+        <span>Operators & Roles</span>
+      </a>
+    </div>
+
+    <div class="menu-section-label">Account & System</div>
+
+    <div class="nav-item">
+      <a href="change_password.php" class="nav-link <?php echo ($current_page == 'change_password.php') ? 'active' : ''; ?>" data-tooltip="Change Password">
+        <i class="fa-solid fa-key"></i>
+        <span>Change Password</span>
+      </a>
+    </div>
 
     <div class="nav-item">
       <a href="../index.php" target="_blank" class="nav-link" data-tooltip="View Website">

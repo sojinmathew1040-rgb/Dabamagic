@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error_msg = "Please fill in all login credentials.";
     } else {
-        $stmt = $con->prepare("SELECT id, username, password, full_name, email, role FROM tbl_admin WHERE username = ?");
+        $stmt = $con->prepare("SELECT id, username, password, full_name, email, role, status FROM tbl_admin WHERE username = ?");
         if ($stmt) {
             $stmt->bind_param("s", $username);
             $stmt->execute();
@@ -33,7 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($result && $result->num_rows === 1) {
                 $user = $result->fetch_assoc();
-                if (password_verify($password, $user['password'])) {
+
+                // Check if user account is disabled
+                if (isset($user['status']) && strtolower($user['status']) === 'disabled') {
+                    $error_msg = "Your account has been disabled by the administrator. Please contact support.";
+                } elseif (password_verify($password, $user['password'])) {
                     // Update last login
                     $update_stmt = $con->prepare("UPDATE tbl_admin SET last_login = NOW() WHERE id = ?");
                     $update_stmt->bind_param("i", $user['id']);

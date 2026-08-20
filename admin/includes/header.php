@@ -71,6 +71,11 @@ $admin_role = $_SESSION['admin_role'] ?? 'Super Admin';
           <span class="action-dot"></span>
         </button>
 
+        <!-- Change Password Shortcut -->
+        <a href="change_password.php" class="btn-header-action" title="Change Password & Security">
+          <i class="fa-solid fa-key"></i>
+        </a>
+
         <!-- Quick View Site -->
         <a href="../index.php" target="_blank" class="btn-header-action" title="View Public Website">
           <i class="fa-solid fa-globe"></i>

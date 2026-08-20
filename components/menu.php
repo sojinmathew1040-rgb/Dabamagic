@@ -134,7 +134,19 @@ if (isset($con) && !$con->connect_error) {
                   <h4 class="menu-item-name"><?php echo htmlspecialchars($item['name']); ?></h4>
                 </div>
                 <div class="menu-item-dots"></div>
-                <span class="menu-item-price">€<?php echo number_format($item['price'], 2); ?></span>
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;">
+                  <span class="menu-item-price">€<?php echo number_format($item['price'], 2); ?></span>
+                  <button type="button" class="btn-add-to-cart" 
+                          data-id="<?php echo $item['id']; ?>"
+                          data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                          data-price="<?php echo $item['price']; ?>"
+                          data-img="<?php echo $image_path; ?>"
+                          data-category="<?php echo htmlspecialchars($item['category']); ?>"
+                          title="Add to order cart">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add</span>
+                  </button>
+                </div>
               </div>
               <p class="menu-item-desc"><?php echo htmlspecialchars($item['description']); ?></p>
             </div>
@@ -151,7 +163,13 @@ if (isset($con) && !$con->connect_error) {
                 <h4 class="menu-item-name">Chicken Dum Biryani</h4>
               </div>
               <div class="menu-item-dots"></div>
-              <span class="menu-item-price">€16.50</span>
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;">
+                <span class="menu-item-price">€16.50</span>
+                <button type="button" class="btn-add-to-cart" data-id="101" data-name="Chicken Dum Biryani" data-price="16.50" data-img="assets/images/hero_biryani.png" data-category="Biryani & Rice" title="Add to cart">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add</span>
+                </button>
+              </div>
             </div>
             <p class="menu-item-desc">Slow-cooked tender chicken, basmati rice, fresh mint & house biryani masala.</p>
           </div>
@@ -179,11 +197,35 @@ if (isset($con) && !$con->connect_error) {
 
     <p id="modal-dish-desc" style="color: var(--text-grey); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;"></p>
 
-    <div style="display: flex; gap: 1rem; justify-content: center;">
-      <a href="#reservation" class="btn btn-primary modal-close-trigger">
-        <span>Order / Book Table</span>
-        <i class="fa-solid fa-utensils"></i>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <button type="button" class="btn btn-primary" id="modal-add-cart-btn" onclick="addModalDishToCart()">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span>Add to Cart</span>
+      </button>
+      <a href="#reservation" class="btn btn-outline modal-close-trigger">
+        <span>Book Table</span>
+        <i class="fa-solid fa-calendar-check"></i>
       </a>
     </div>
   </div>
 </div>
+
+<script>
+  function addModalDishToCart() {
+    const title = document.getElementById('modal-dish-title').textContent;
+    const priceText = document.getElementById('modal-dish-price').textContent;
+    const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+    const img = document.getElementById('modal-dish-img').getAttribute('src');
+
+    DMCart.addItem({
+      name: title,
+      price: price,
+      image: img,
+      quantity: 1
+    });
+
+    // Close dish modal
+    const dishModal = document.getElementById('dish-detail-modal');
+    if (dishModal) dishModal.classList.remove('active');
+  }
+</script>

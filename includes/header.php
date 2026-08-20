@@ -56,6 +56,12 @@
           <a href="index.php#reservation">FEEDBACK</a>
           <a href="index.php#contact">CONTACT US</a>
         </div>
+
+        <!-- Shopping Cart Trigger Button -->
+        <button type="button" class="dm-header-cart-btn trigger-cart-drawer" aria-label="View Shopping Cart" title="View Cart">
+          <i class="fa-solid fa-basket-shopping"></i>
+          <span class="cart-count-badge" id="header-cart-badge">0</span>
+        </button>
         
         <button class="dm-menu-circle-btn mobile-menu-toggle" id="dm-menu-toggle-btn" aria-label="Toggle Menu">
           <i class="fa-solid fa-bars"></i>
@@ -146,3 +152,43 @@
 
     </div>
   </div>
+
+  <!-- Cart Drawer Backdrop Overlay -->
+  <div class="dm-cart-backdrop" id="dm-cart-backdrop" onclick="DMCart.closeCartDrawer()"></div>
+
+  <!-- Slide-In Cart Drawer -->
+  <aside class="dm-cart-drawer" id="dm-cart-drawer" aria-label="Shopping Cart Drawer">
+    <div class="cart-drawer-header">
+      <h3 class="cart-drawer-title">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span>Your Order Cart</span>
+      </h3>
+      <button type="button" class="cart-drawer-close-btn" onclick="DMCart.closeCartDrawer()" aria-label="Close Cart">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="cart-drawer-body" id="dm-cart-items-list">
+      <!-- Populated dynamically by DMCart.updateUI() -->
+    </div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-summary-row">
+        <span>Subtotal</span>
+        <strong id="dm-cart-subtotal">€0.00</strong>
+      </div>
+      <div class="cart-summary-row">
+        <span>Estimated Tax & Delivery</span>
+        <small style="color: var(--clr-gold-bright);">Calculated at Checkout</small>
+      </div>
+      <div class="cart-summary-row total-row">
+        <span>Total</span>
+        <strong id="dm-cart-total" style="color: var(--clr-gold-bright);">€0.00</strong>
+      </div>
+
+      <a href="checkout.php" class="cart-checkout-btn disabled" id="dm-cart-checkout-btn">
+        <span>Proceed to Checkout</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </aside>
