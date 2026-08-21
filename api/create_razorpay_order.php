@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../includes/db_connection.php';
 require_once __DIR__ . '/../includes/razorpay_config.php';
+require_once __DIR__ . '/../admin/db_init.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'error' => 'Invalid request method. POST required.']);

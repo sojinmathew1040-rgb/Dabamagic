@@ -49,12 +49,19 @@
     </div>
   </footer>
 
+  <!-- Floating Quick Cart Button -->
+  <button id="floating-cart-btn" class="floating-quick-cart trigger-cart-drawer" aria-label="Open Cart" title="View Order Cart">
+    <i class="fa-solid fa-basket-shopping"></i>
+    <span class="cart-count-badge floating-badge" id="floating-cart-badge">0</span>
+  </button>
+
   <!-- Floating Back to Top Button -->
   <button id="back-to-top-btn" class="floating-back-to-top" aria-label="Back to Top">
     <i class="fa-solid fa-arrow-up"></i>
   </button>
 
   <!-- JavaScript Libraries & Modules -->
+  <script src="assets/js/cart.js"></script>
   <script src="assets/js/menu.js"></script>
   <script src="assets/js/gsap-animations.js"></script>
   <script src="assets/js/main.js"></script>
