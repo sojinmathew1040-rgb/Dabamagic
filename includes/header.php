@@ -53,6 +53,7 @@
       <div class="header-right-controls">
         <div class="dm-top-links-list">
           <a href="menu.php">ORDER ONLINE</a>
+          <a href="track_order.php">TRACK ORDER</a>
           <a href="index.php#reservation">FEEDBACK</a>
           <a href="index.php#contact">CONTACT US</a>
         </div>
@@ -108,6 +109,7 @@
             <li><a href="index.php" class="overlay-nav-link">Home</a></li>
             <li><a href="about.php" class="overlay-nav-link">About Us</a></li>
             <li><a href="menu.php" class="overlay-nav-link">Explore Full Menu</a></li>
+            <li><a href="track_order.php" class="overlay-nav-link" style="color: var(--clr-gold-bright);">Track Order Live</a></li>
             <li><a href="index.php#specials" class="overlay-nav-link">Daba Magic Specials</a></li>
             <li><a href="index.php#experience" class="overlay-nav-link">Culinary Craft</a></li>
             <li><a href="index.php#gallery" class="overlay-nav-link">Visual Gallery</a></li>
